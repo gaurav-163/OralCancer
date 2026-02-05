@@ -67,7 +67,7 @@ Class Probabilities:
 4. **Important Considerations**: What should the healthcare provider consider when reviewing these results?
 
 Please maintain a balanced, professional tone. Do not cause unnecessary alarm, but be clear about any concerning findings.
-Remember to emphasize that AI analysis supplements but does not replace professional medical evaluation.
+
 """
     
     return prompt
@@ -125,7 +125,7 @@ Based on the following analysis, generate specific, actionable recommendations:
 - For HIGH risk: Include urgent referral recommendations and immediate follow-up actions
 - For MODERATE risk: Include monitoring recommendations and scheduled follow-up
 - For LOW risk: Include preventive care and routine monitoring recommendations
-- Always include at least one recommendation about professional medical consultation
+
 - Make recommendations specific and actionable
 - Consider patient risk factors when applicable
 - Limit to 4-6 most important recommendations
@@ -161,8 +161,7 @@ The user has a follow-up question or observation:
 Please provide a helpful response that:
 1. Addresses their specific question
 2. Relates to the original analysis when relevant
-3. Maintains appropriate medical disclaimer where necessary
-4. Suggests professional consultation if the question requires clinical judgment
+3. Suggests professional consultation if the question requires clinical judgment
 """
     
     return prompt
@@ -204,7 +203,7 @@ Please provide:
 3. **Clinical Significance**: Are these changes clinically meaningful?
 4. **Recommendations**: What follow-up actions should be considered based on this comparison?
 
-Remember to emphasize that AI-based comparison has limitations and professional evaluation is essential.
+
 """
     
     return prompt

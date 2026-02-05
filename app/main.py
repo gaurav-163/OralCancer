@@ -111,7 +111,7 @@ st.markdown("""
     .card-title {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #1a202c;
+        color: #1a202c !important;
         margin: 0;
     }
     
@@ -260,7 +260,11 @@ st.markdown("""
         margin-top: 3rem;
     }
     
-    /* Metric Cards */
+    /* Force dark text for content inside white/light containers */
+    .card, .card *, .metric-card, .metric-card *, .upload-area, .upload-area * {
+        color: #1a202c !important;
+    }
+
     .metric-card {
         background: #f8fafc;
         border-radius: 10px;
@@ -268,15 +272,9 @@ st.markdown("""
         text-align: center;
     }
     
-    .metric-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1a202c;
-    }
-    
     .metric-label {
         font-size: 0.8rem;
-        color: #64748b;
+        color: #64748b !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -332,16 +330,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # Medical Disclaimer
-    st.markdown("""
-    <div class="alert alert-warning">
-        <i class="fas fa-exclamation-triangle alert-icon"></i>
-        <div class="alert-content">
-            <div class="alert-title">Medical Disclaimer</div>
-            <div>This tool is designed to assist healthcare professionals and should not be used as a 
-            substitute for professional medical diagnosis. Always consult with a qualified healthcare provider.</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+
     
     # Two-column layout
     col1, col2 = st.columns([1, 1], gap="large")
@@ -405,11 +394,11 @@ def main():
                             st.session_state.analysis_result = {
                                 "prediction": prediction,
                                 "risk_level": "Moderate" if prediction.get("confidence", 0) > 0.5 else "Low",
-                                "analysis": "AI analysis could not be completed. Please review the classification results and consult a healthcare professional.",
+                                "analysis": "AI analysis could not be completed. Please review the classification results.",
                                 "recommendations": [
-                                    {"priority": "high", "text": "Consult with a healthcare professional for proper diagnosis"},
-                                    {"priority": "medium", "text": "Schedule a follow-up examination"},
-                                    {"priority": "low", "text": "Maintain regular oral health checkups"}
+                                    {"priority": "high", "text": "Review classification confidence levels"},
+                                    {"priority": "medium", "text": "Check for visible abnormalities"},
+                                    {"priority": "low", "text": "Monitor for changes over time"}
                                 ]
                             }
     
@@ -435,7 +424,7 @@ def main():
     st.markdown(f"""
     <div class="app-footer">
         <p>{config['app']['title']} v{config['app']['version']} | Built with Streamlit and LangGraph</p>
-        <p style="font-size: 0.75rem; color: #94a3b8;">For research and educational purposes only</p>
+
     </div>
     """, unsafe_allow_html=True)
 
