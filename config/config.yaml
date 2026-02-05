@@ -1,0 +1,31 @@
+# Application Configuration
+app:
+  title: "Oral Cancer Detection AI"
+  description: "AI-powered oral cancer screening and risk assessment"
+  version: "1.0.0"
+
+# Model Configuration
+model:
+  # Local path for the downloaded model
+  path: "models/oral-cancer-model.h5"
+  # Hugging Face repository to download from
+  huggingface_repo_id: "gauravvv7/Oralcancer"
+  huggingface_filename: "oral-cancer-model.h5"
+  input_size: [224, 224]
+  classes:
+    - "Normal"
+    - "Oral Cancer"
+  confidence_threshold: 0.7
+
+# LLM Configuration
+llm:
+  provider: "cohere"
+  model: "command-r-08-2024"
+  temperature: 0.3
+  max_tokens: 1024
+
+# UI Configuration
+ui:
+  theme: "dark"
+  sidebar_width: 300
+  max_upload_size_mb: 10
