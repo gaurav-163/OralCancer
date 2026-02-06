@@ -10,6 +10,9 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from .state import AnalysisState
 from utils.prompts import get_analysis_prompt, get_recommendation_prompt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
