@@ -12,8 +12,9 @@ jobs:
     steps:
       - name: Ping Streamlit App
         run: |
-          # Replace with your actual Streamlit Cloud app URL
-          APP_URL="https://oral-cancer-ai.streamlit.app"
+          # Replace with your actual Streamlit Cloud app URL after deployment
+          # Example: https://your-app-name.streamlit.app
+          APP_URL="https://oralcancerr.streamlit.app/"
           
           # Ping the app
           curl -s -o /dev/null -w "%{http_code}" $APP_URL
