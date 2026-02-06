@@ -197,17 +197,24 @@ class OralCancerPredictor:
             # Predict
             print("🧠 Running model inference...")
             prediction = self.model.predict(batch_input, verbose=0)
-            raw_output = float(prediction[0][0])
-            
-            print(f"📈 Raw model output: {raw_output:.4f}")
-            
-            # IMPORTANT: Training labels are {"cancer": 0, "non_cancer": 1}
-            # With sigmoid output, raw_output represents P(class=1) = P(non_cancer/Normal)
-            # Therefore: cancer_prob = 1 - raw_output, normal_prob = raw_output
-            
-            cancer_prob = 1.0 - raw_output
-            normal_prob = raw_output
-            
+            pred_array = np.array(prediction)
+
+            # Handle both sigmoid (1 output) and softmax (2 outputs) models
+            if pred_array.shape[-1] == 2:
+                # Softmax output: [cancer, non_cancer]
+                cancer_prob = float(pred_array[0][0])
+                normal_prob = float(pred_array[0][1])
+                print(f"📈 Raw model output (softmax): cancer={cancer_prob:.4f}, normal={normal_prob:.4f}")
+            else:
+                # Sigmoid output: P(non_cancer/Normal)
+                raw_output = float(pred_array[0][0])
+                print(f"📈 Raw model output (sigmoid): {raw_output:.4f}")
+
+                # Training labels: cancer=0, non_cancer=1
+                # raw_output = P(non_cancer/Normal)
+                cancer_prob = 1.0 - raw_output
+                normal_prob = raw_output
+
             print(f"   Interpreted probabilities (label mapping):")
             print(f"      • Normal: {normal_prob:.2%}")
             print(f"      • Oral Cancer: {cancer_prob:.2%}")
