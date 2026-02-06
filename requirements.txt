@@ -2,7 +2,7 @@
 streamlit>=1.31.0
 
 # LangChain & LangGraph
-langchain>=0.1.0
+langchain==0.3.26
 langgraph>=0.0.20
 langchain-cohere>=0.1.0
 cohere>=5.0.0
