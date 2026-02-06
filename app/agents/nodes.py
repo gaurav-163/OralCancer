@@ -22,17 +22,28 @@ def create_llm(config: dict) -> ChatCohere:
     """Create Cohere LLM instance from config"""
     # Get API key from environment or Streamlit secrets
     api_key = os.getenv("COHERE_API_KEY")
+    key_source = "environment variable" if api_key else None
     
-    # Fallback to Streamlit secrets if available
+    # Fallback to Streamlit secrets if available (try multiple locations)
     if not api_key:
         try:
             import streamlit as st
-            api_key = st.secrets["project"]["COHERE_API_KEY"]
+            # Try top-level first
+            api_key = st.secrets.get("COHERE_API_KEY")
+            if api_key:
+                key_source = "Streamlit secrets (top-level)"
+            else:
+                # Try under 'project' key
+                api_key = st.secrets.get("project", {}).get("COHERE_API_KEY")
+                if api_key:
+                    key_source = "Streamlit secrets (project)"
         except Exception as e:
             logger.debug(f"Could not access Streamlit secrets: {e}")
     
     if not api_key:
         raise ValueError("COHERE_API_KEY not found in environment variables or Streamlit secrets")
+    
+    logger.info(f"Using Cohere API key from: {key_source}")
     
     return ChatCohere(
         cohere_api_key=api_key,

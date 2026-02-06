@@ -37,6 +37,18 @@ def render_sidebar(config: dict) -> dict:
         
         patient_info = {}
         
+        # Name
+        st.markdown("""
+        <span style="font-size: 0.8rem; font-weight: 500; color: #4a5568;">
+            <i class="fas fa-user" style="margin-right: 6px; color: #94a3b8;"></i>Name
+        </span>
+        """, unsafe_allow_html=True)
+        patient_info["name"] = st.text_input(
+            "Name",
+            placeholder="Enter patient name",
+            label_visibility="collapsed"
+        )
+        
         # Age
         st.markdown("""
         <span style="font-size: 0.8rem; font-weight: 500; color: #4a5568;">
