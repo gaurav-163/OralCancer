@@ -14,11 +14,9 @@ logger = logging.getLogger(__name__)
 
 class OralCancerPredictor:
     """
-    Wrapper class for the gauravvv7/Oralcancer model.
-    Input: 300x300 RGB images
-    Output: Binary classification where:
-        - Output close to 0 = Oral Cancer
-        - Output close to 1 = Normal
+    Wrapper class for the sneh04/oral-cancer-model from Hugging Face.
+    Input: 224x224 RGB images
+    Output: Binary classification for oral cancer detection
     """
     
     def __init__(self, config: dict):
@@ -29,12 +27,12 @@ class OralCancerPredictor:
         self.confidence_threshold = config["model"]["confidence_threshold"]
         
         # HuggingFace model info
-        self.hf_repo_id = config["model"].get("huggingface_repo_id", "gauravvv7/Oralcancer")
+        self.hf_repo_id = config["model"].get("huggingface_repo_id", "sneh04/oral-cancer-model")
         self.hf_filename = config["model"].get("huggingface_filename", "oral-cancer-model.h5")
         self.model_path = Path(config["model"]["path"])
         
-        # Model expects 300x300 input
-        self.input_size = (300, 300)
+        # Model expects 224x224 input
+        self.input_size = (224, 224)
         self.model_type = None
         
         # Load the model
@@ -131,7 +129,7 @@ class OralCancerPredictor:
             print(f"   Output shape: {self.model.output_shape}")
             print(f"   Expected input size: {self.input_size}")
             print(f"   Classes: {self.classes}")
-            print(f"   ⚠️  Note: Model uses INVERTED labels (0=Cancer, 1=Normal)")
+            print(f"   ⚠️  Model: sneh04/oral-cancer-model")
             print("="*80 + "\n")
             
         except Exception as e:
