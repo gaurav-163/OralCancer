@@ -206,14 +206,13 @@ class OralCancerPredictor:
                 normal_prob = float(pred_array[0][1])
                 print(f"📈 Raw model output (softmax): cancer={cancer_prob:.4f}, normal={normal_prob:.4f}")
             else:
-                # Sigmoid output: P(non_cancer/Normal)
+                # Sigmoid output: raw_output = P(cancer) directly
                 raw_output = float(pred_array[0][0])
                 print(f"📈 Raw model output (sigmoid): {raw_output:.4f}")
 
-                # Training labels: cancer=0, non_cancer=1
-                # raw_output = P(non_cancer/Normal)
-                cancer_prob = 1.0 - raw_output
-                normal_prob = raw_output
+                # Direct interpretation: raw output is cancer probability
+                cancer_prob = raw_output
+                normal_prob = 1.0 - raw_output
 
             print(f"   Interpreted probabilities (label mapping):")
             print(f"      • Normal: {normal_prob:.2%}")
