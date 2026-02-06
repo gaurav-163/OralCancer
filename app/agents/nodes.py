@@ -26,7 +26,7 @@ def create_llm(config: dict) -> ChatCohere:
     if not api_key:
         try:
             import streamlit as st
-            api_key = st.secrets["COHERE_API_KEY"]
+            api_key = st.secrets["project"]["COHERE_API_KEY"]
         except Exception as e:
             logger.debug(f"Could not access Streamlit secrets: {e}")
     
