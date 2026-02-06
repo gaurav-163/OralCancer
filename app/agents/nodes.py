@@ -9,7 +9,8 @@ from langchain_cohere import ChatCohere
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from .state import AnalysisState
-from utils.prompts import get_analysis_prompt, get_recommendation_prompt
+from utils.prompts import get_analysis_prompt, get_recommendation_prompt, get_system_prompt
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -81,10 +82,17 @@ def analyze_prediction_node(state: AnalysisState, config: dict) -> AnalysisState
             patient_info=state.patient_info
         )
 
+        # Build system prompt and substitute patient name if available
+        patient_name = None
+        try:
+            patient_name = state.patient_info.get("name") if state.patient_info else None
+        except Exception:
+            patient_name = None
+
+        system_prompt = get_system_prompt(patient_name)
+
         messages = [
-            SystemMessage(content=(
-                "You are a concise medical AI assistant. Provide a short 2-sentence analysis and a single recommendation."
-            )),
+            SystemMessage(content=system_prompt),
             HumanMessage(content=prompt)
         ]
 
