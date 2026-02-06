@@ -22,7 +22,7 @@ llm:
   provider: "cohere"
   model: "command-r-08-2024"
   temperature: 0.3
-  max_tokens: 1024
+  max_tokens: 512
 
 # UI Configuration
 ui:

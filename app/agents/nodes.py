@@ -55,10 +55,8 @@ def analyze_prediction_node(state: AnalysisState, config: dict) -> AnalysisState
         )
         
         messages = [
-            SystemMessage(content="""You are an expert medical AI assistant specializing in oral pathology. 
-            Your role is to analyze ML model predictions for oral lesions and provide clear, 
-            professional explanations. Always maintain a balanced tone - be informative but not alarmist.
-            Keep your response concise (2-3 paragraphs). Remember to always recommend professional medical consultation."""),
+            SystemMessage(content="""You are a medical AI assistant for oral pathology. 
+Provide a clear, concise analysis in 2-3 short paragraphs. Be professional and recommend medical consultation."""),
             HumanMessage(content=prompt)
         ]
         
