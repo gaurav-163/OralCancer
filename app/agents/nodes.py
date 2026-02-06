@@ -26,9 +26,9 @@ def create_llm(config: dict) -> ChatCohere:
     if not api_key:
         try:
             import streamlit as st
-            api_key = st.secrets.get("COHERE_API_KEY")
-        except:
-            pass
+            api_key = st.secrets["COHERE_API_KEY"]
+        except Exception as e:
+            logger.debug(f"Could not access Streamlit secrets: {e}")
     
     if not api_key:
         raise ValueError("COHERE_API_KEY not found in environment variables or Streamlit secrets")
