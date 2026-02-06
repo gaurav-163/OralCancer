@@ -24,8 +24,10 @@ model:
 llm:
   provider: "cohere"
   model: "command-r-08-2024"
-  temperature: 0.3
-  max_tokens: 512
+  temperature: 0.25
+  max_tokens: 150
+  # Enable/disable LLM analysis (set false to skip LLM and use fallback)
+  enabled: true
 
 # UI Configuration
 ui:

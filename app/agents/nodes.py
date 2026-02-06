@@ -46,24 +46,59 @@ def analyze_prediction_node(state: AnalysisState, config: dict) -> AnalysisState
     Node that analyzes the ML prediction using LLM.
     """
     try:
+        # Skip LLM if disabled in config
+        if not config.get("llm", {}).get("enabled", True):
+            raise RuntimeError("LLM disabled in configuration")
+
+        # Simple cache to speed repeated analysis: hash of prediction+patient_info
+        import hashlib, json
+        cache_dir = Path(".cache")
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        cache_key_obj = {
+            "prediction": state.prediction,
+            "patient_info": state.patient_info
+        }
+        cache_key = hashlib.sha1(json.dumps(cache_key_obj, sort_keys=True).encode("utf-8")).hexdigest()
+        cache_file = cache_dir / f"analysis_{cache_key}.json"
+
+        if cache_file.exists():
+            try:
+                with open(cache_file, "r") as cf:
+                    cached = json.load(cf)
+                    state.analysis = cached.get("analysis")
+                    logger.info(f"Using cached LLM analysis ({cache_file})")
+                    return state
+            except Exception:
+                # If cache read fails, continue to call LLM
+                logger.warning("Failed to read analysis cache; will call LLM")
+
         llm = create_llm(config)
-        
-        # Build the analysis prompt
+
+        # Build the analysis prompt (keep short)
         prompt = get_analysis_prompt(
             prediction=state.prediction,
             patient_info=state.patient_info
         )
-        
+
         messages = [
-            SystemMessage(content="""You are a medical AI assistant for oral pathology. 
-Provide a clear, concise analysis in 2-3 short paragraphs. Be professional and recommend medical consultation."""),
+            SystemMessage(content=(
+                "You are a concise medical AI assistant. Provide a short 2-sentence analysis and a single recommendation."
+            )),
             HumanMessage(content=prompt)
         ]
-        
+
         logger.info("Calling Cohere LLM for analysis...")
         response = llm.invoke(messages)
         state.analysis = response.content
         logger.info("Analysis generated successfully")
+
+        # Cache the result for future identical requests
+        try:
+            with open(cache_file, "w") as cf:
+                json.dump({"analysis": state.analysis}, cf)
+        except Exception:
+            logger.warning("Failed to write analysis cache")
         
     except Exception as e:
         logger.error(f"Analysis failed: {str(e)}")
