@@ -32,6 +32,8 @@ def get_analysis_prompt(
     patient_summary = "No patient information provided."
     if patient_info:
         info_parts = []
+        if patient_info.get("name"):
+            info_parts.append(f"Name: {patient_info['name']}")
         if patient_info.get("age"):
             info_parts.append(f"Age: {patient_info['age']}")
         if patient_info.get("gender") and patient_info["gender"] != "Not specified":
@@ -49,24 +51,52 @@ def get_analysis_prompt(
             patient_summary = "\n".join(info_parts)
     
     prompt = f"""
-Analyze the following oral lesion image classification results and provide a detailed, professional analysis.
+Analyze the following oral lesion image classification results and provide a structured, professional clinical assessment to support (but not replace) healthcare decision-making.
+
+You are acting as a clinical AI assistant interpreting machine-learning–based predictions. The output must be medically responsible, balanced, and clear about uncertainty.
 
 ## ML Model Classification Results:
-Primary Prediction: {pred_class} ({confidence*100:.1f}% confidence)
+- Primary Predicted Class: {pred_class}
+- Model Confidence: {confidence*100:.1f}%
 
-Class Probabilities:
+Class Probability Distribution:
 {prob_summary}
 
-## Patient Information:
+## Patient Information (if available):
 {patient_summary}
 
-## Please provide:
-1. **Clinical Interpretation**: Explain what the classification results suggest about the lesion
-2. **Key Observations**: Based on the confidence levels and class probabilities, what patterns are notable?
-3. **Risk Factor Analysis**: If patient information is available, how do their risk factors relate to the findings?
-4. **Important Considerations**: What should the healthcare provider consider when reviewing these results?
+## Please provide the following analysis:
 
-Please maintain a balanced, professional tone. Do not cause unnecessary alarm, but be clear about any concerning findings.
+1. Clinical Interpretation:
+   - Explain what the predicted class and confidence level suggest about the oral lesion.
+   - Describe the likely clinical relevance of the prediction.
+   - Clearly state that this is a probabilistic AI output and not a definitive diagnosis.
+
+2. Key Observations from Model Output:
+   - Comment on the strength of the confidence (high, moderate, or low).
+   - Identify any competing classes with notable probabilities.
+   - Highlight ambiguity or uncertainty in the prediction if present.
+
+3. Risk Factor Correlation (if patient data is available):
+   - Relate patient-specific risk factors (such as age, habits, symptoms, or medical history) to the predicted lesion.
+   - Explain whether the patient information supports or contradicts the model output.
+   - Avoid assumptions if data is incomplete or missing.
+
+4. Important Clinical Considerations:
+   - Outline considerations for healthcare providers reviewing these results.
+   - Mention the need for further clinical evaluation, diagnostic tests, or specialist referral if appropriate.
+   - Acknowledge the limitations of image-based AI classification.
+   - Emphasize the importance of clinical correlation and professional judgment.
+
+## Communication Guidelines:
+- Maintain a calm, professional, and medically appropriate tone.
+- Do not cause unnecessary alarm.
+- Clearly communicate uncertainty where applicable.
+- Avoid definitive diagnoses or treatment recommendations.
+
+## Output Style:
+- Structured and concise
+- Suitable for inclusion in a clinical report or decision-support interface
 
 """
     
@@ -165,7 +195,6 @@ Recommendations:
 2. <optional additional item>
 Rationale: <one short sentence>
 
-This is an AI screening tool and not a diagnosis.
 """
     return prompt
 
