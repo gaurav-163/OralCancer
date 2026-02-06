@@ -84,7 +84,6 @@ class OralCancerPredictor:
         print("🚀 INITIALIZING MODEL LOADING")
         print("="*80)
         
-        # Check if model exists locally
         print(f"📍 Looking for model at: {self.model_path}")
         print(f"   File exists: {self.model_path.exists()}")
         
@@ -178,7 +177,14 @@ class OralCancerPredictor:
         pil_img = pil_img.resize((self.input_size[1], self.input_size[0]), PILImage.Resampling.LANCZOS)
         
         # Convert back to numpy and normalize to [0, 1]
-        procprint("📊 Preprocessing image...")
+        processed = np.array(pil_img).astype(np.float32) / 255.0
+        
+        return processed
+    
+    def _keras_prediction(self, image: np.ndarray) -> dict:
+        """Make prediction using Keras model."""
+        try:
+            print("📊 Preprocessing image...")
             # Preprocess
             processed = self._preprocess(image)
             print(f"   Processed shape: {processed.shape}")
@@ -193,20 +199,18 @@ class OralCancerPredictor:
             prediction = self.model.predict(batch_input, verbose=0)
             raw_output = float(prediction[0][0])
             
-            print(f"📈 tch dimension
-            batch_input = np.expand_dims(processed, axis=0)
-            
-            # Predict
-            prediction = self.model.predict(batch_input, verbose=0)
-            raw_output = float(prediction[0][0])
-            
-            print(f"Raw model output: {raw_output:.4f}")
+            print(f"📈 Raw model output: {raw_output:.4f}")
             
             # IMPORTANT: Model uses INVERTED labels
             # Output close to 0 = Oral Cancer
             # Output close to 1 = Normal
             # So we INVERT the interpretation:
-               Interpreted probabilities:")
+            
+            # Cancer probability = 1 - raw_output
+            cancer_prob = 1.0 - raw_output
+            normal_prob = raw_output
+            
+            print(f"   Interpreted probabilities:")
             print(f"      • Normal: {normal_prob:.2%}")
             print(f"      • Oral Cancer: {cancer_prob:.2%}")
             
@@ -228,18 +232,10 @@ class OralCancerPredictor:
             print(f"   Predicted class: {predicted_class}")
             print(f"   Confidence: {confidence:.1%}")
             print(f"   Above threshold ({self.confidence_threshold:.0%}): {confidence >= self.confidence_threshold}")
-            print("="*80 + "\n
-            else:
-                predicted_class = self.classes[0]  # Normal
-                confidence = normal_prob
+            print("="*80 + "\n")
             
-            print("="*80)
-            print(f"❌ PREDICTION FAILED: {e}")
-            print("="*80)
-            logger.error(f"Prediction failed: {e}")
-            import traceback
-            traceback.print_exc()
-            print("⚠️  Falling back to mock prediction"": predicted_class,
+            return {
+                "predicted_class": predicted_class,
                 "confidence": confidence,
                 "class_probabilities": class_probs,
                 "above_threshold": confidence >= self.confidence_threshold,
@@ -248,10 +244,13 @@ class OralCancerPredictor:
             }
             
         except Exception as e:
+            print("="*80)
+            print(f"❌ PREDICTION FAILED: {e}")
+            print("="*80)
             logger.error(f"Prediction failed: {e}")
-            print(f"Prediction error: {e}")
             import traceback
             traceback.print_exc()
+            print("⚠️  Falling back to mock prediction")
             return self._mock_prediction(image)
     
     def _mock_prediction(self, image: np.ndarray) -> dict:
