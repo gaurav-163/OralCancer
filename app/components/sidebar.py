@@ -21,26 +21,8 @@ def render_sidebar(config: dict) -> dict:
         </div>
         """, unsafe_allow_html=True)
         
-        # Model confidence threshold
-        st.markdown("""
-        <div style="margin-bottom: 0.5rem;">
-            <span style="font-size: 0.85rem; font-weight: 500; color: #4a5568;">
-                <i class="fas fa-sliders-h" style="margin-right: 6px; color: #667eea;"></i>
-                Confidence Threshold
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        settings["confidence_threshold"] = st.slider(
-            "Confidence Threshold",
-            min_value=0.5,
-            max_value=0.99,
-            value=config["model"]["confidence_threshold"],
-            step=0.05,
-            label_visibility="collapsed"
-        )
-        
-        st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+        # Confidence threshold is hardcoded in the predictor (hidden from UI)
+        # (No UI control shown.)
         
         # Patient Information Section
         st.markdown("""

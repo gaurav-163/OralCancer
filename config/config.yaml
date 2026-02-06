@@ -10,12 +10,15 @@ model:
   path: "app/models/oral-cancer-model.h5"
   # Hugging Face repository to download from
   huggingface_repo_id: "gauravvv7/Oralcancer"
-  huggingface_filename: "vit_model.h5"
+  huggingface_filename: "oral-cancer-model.h5"
   input_size: [224, 224]
   classes:
-    - "Normal"
+    - "Non-cancer"
     - "Oral Cancer"
-  confidence_threshold: 0.7
+  # How the model's softmax outputs are ordered. Use 'cancer_first' if
+  # the model returns [cancer, normal], or 'normal_first' if it returns
+  # [normal, cancer]. If you see reversed labels, flip this value.
+  output_order: "cancer_first"
 
 # LLM Configuration
 llm:
