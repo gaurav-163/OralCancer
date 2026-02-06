@@ -10,7 +10,7 @@ app_dir = Path(__file__).parent / "app"
 sys.path.insert(0, str(app_dir))
 
 # Import and run the main application
-from main import main
+from app.main import main
 
 if __name__ == "__main__":
     main()
