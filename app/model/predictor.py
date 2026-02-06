@@ -25,7 +25,8 @@ class OralCancerPredictor:
         self.config = config
         self.model = None
         self.classes = config["model"]["classes"]  # ["Normal", "Oral Cancer"]
-        self.confidence_threshold = config["model"]["confidence_threshold"]
+        # Hardcoded cancer probability threshold (do not expose in frontend)
+        self.confidence_threshold = 0.70
         
         # HuggingFace model info
         self.hf_repo_id = config["model"].get("huggingface_repo_id", "gauravvv7/Oralcancer")
@@ -35,6 +36,8 @@ class OralCancerPredictor:
         # Model expects 224x224 input
         self.input_size = (224, 224)
         self.model_type = None
+        # Output order config: 'cancer_first' or 'normal_first'
+        self.output_order = config["model"].get("output_order", "cancer_first")
         
         # Load the model
         self._load_model()
@@ -146,8 +149,9 @@ class OralCancerPredictor:
             print(f"   Input shape: {self.model.input_shape}")
             print(f"   Output shape: {self.model.output_shape}")
             print(f"   Expected input size: {self.input_size}")
-            print(f"   Classes: {self.classes}")
-            print(f"   ⚠️  Model: {self.hf_repo_id} (Vision Transformer)")
+            # Use configured class names to avoid hard-coded or incorrect labels
+            print(f"   Classes (from config): {self.classes}")
+            print(f"   Model source: {self.hf_repo_id}")
             print("="*80 + "\n")
             
         except Exception as e:
@@ -216,11 +220,21 @@ class OralCancerPredictor:
             pred_array = np.array(prediction)
 
             # Handle both sigmoid (1 output) and softmax (2 outputs) models
+            raw_output = None
             if pred_array.shape[-1] == 2:
-                # Softmax output: [cancer, non_cancer]
-                cancer_prob = float(pred_array[0][0])
-                normal_prob = float(pred_array[0][1])
-                print(f"📈 Raw model output (softmax): cancer={cancer_prob:.4f}, normal={normal_prob:.4f}")
+                # Softmax output with configurable ordering
+                a0 = float(pred_array[0][0])
+                a1 = float(pred_array[0][1])
+                raw_output = pred_array[0].tolist()
+                if self.output_order == "cancer_first":
+                    cancer_prob = a0
+                    normal_prob = a1
+                    print(f"📈 Raw model output (softmax, cancer_first): cancer={cancer_prob:.4f}, normal={normal_prob:.4f}")
+                else:
+                    # normal_first
+                    normal_prob = a0
+                    cancer_prob = a1
+                    print(f"📈 Raw model output (softmax, normal_first): normal={normal_prob:.4f}, cancer={cancer_prob:.4f}")
             else:
                 # Sigmoid output: raw_output = P(normal) based on training labels
                 raw_output = float(pred_array[0][0])
@@ -232,27 +246,33 @@ class OralCancerPredictor:
                 cancer_prob = 1.0 - raw_output
 
             print(f"   Interpreted probabilities (label mapping):")
-            print(f"      • Normal: {normal_prob:.2%}")
-            print(f"      • Oral Cancer: {cancer_prob:.2%}")
-            
-            # Use explicit class names to avoid order-related mixups
+            print(f"      • {self.classes[0]}: {normal_prob:.2%}")
+            print(f"      • {self.classes[1]}: {cancer_prob:.2%}")
+
+            # Map probabilities to configured class names
             class_probs = {
-                "Normal": normal_prob,
-                "Oral Cancer": cancer_prob
+                self.classes[0]: normal_prob,
+                self.classes[1]: cancer_prob
             }
             
-            # Determine prediction
-            if cancer_prob >= 0.5:
-                predicted_class = "Oral Cancer"
-                confidence = cancer_prob
+            # Determine prediction using configured confidence threshold
+            try:
+                threshold = float(self.confidence_threshold)
+            except Exception:
+                threshold = 0.6
+
+            if cancer_prob >= threshold:
+                predicted_class = self.classes[1]
             else:
-                predicted_class = "Normal"
-                confidence = normal_prob
+                predicted_class = self.classes[0]
+
+            # Report cancer probability as the primary confidence metric
+            confidence = cancer_prob
             
             print("="*80)
             print(f"✅ PREDICTION COMPLETE")
             print(f"   Predicted class: {predicted_class}")
-            print(f"   Confidence: {confidence:.1%}")
+            print(f"   Confidence (cancer probability): {confidence:.1%}")
             print(f"   Above threshold ({self.confidence_threshold:.0%}): {confidence >= self.confidence_threshold}")
             print("="*80 + "\n")
             
@@ -260,7 +280,7 @@ class OralCancerPredictor:
                 "predicted_class": predicted_class,
                 "confidence": confidence,
                 "class_probabilities": class_probs,
-                "above_threshold": confidence >= self.confidence_threshold,
+                "above_threshold": cancer_prob >= threshold,
                 "model_type": "keras",
                 "raw_output": raw_output
             }
