@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 class OralCancerPredictor:
     """
-    Wrapper class for the sneh04/oral-cancer-model from Hugging Face.
+    Wrapper class for the gauravvv7/oralcancervit model from Hugging Face.
+    ViT (Vision Transformer) based oral cancer detection model.
     Input: 224x224 RGB images
     Output: Binary classification for oral cancer detection
     """
@@ -27,7 +28,7 @@ class OralCancerPredictor:
         self.confidence_threshold = config["model"]["confidence_threshold"]
         
         # HuggingFace model info
-        self.hf_repo_id = config["model"].get("huggingface_repo_id", "sneh04/oral-cancer-model")
+        self.hf_repo_id = config["model"].get("huggingface_repo_id", "gauravvv7/oralcancervit")
         self.hf_filename = config["model"].get("huggingface_filename", "oral-cancer-model.h5")
         self.model_path = Path(config["model"]["path"])
         
@@ -129,7 +130,7 @@ class OralCancerPredictor:
             print(f"   Output shape: {self.model.output_shape}")
             print(f"   Expected input size: {self.input_size}")
             print(f"   Classes: {self.classes}")
-            print(f"   ⚠️  Model: sneh04/oral-cancer-model")
+            print(f"   ⚠️  Model: gauravvv7/oralcancervit (Vision Transformer)")
             print("="*80 + "\n")
             
         except Exception as e:
