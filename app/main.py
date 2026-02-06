@@ -367,15 +367,20 @@ def main():
                 
                 # Analyze button
                 if st.button("Analyze Image", key="analyze_btn"):
-                    with st.spinner("Analyzing image..."):
+                    # Step 1: Keras Model Prediction
+                    with st.spinner("🧠 Running Keras model prediction..."):
                         # Preprocess
                         processed_image = preprocess_image(
                             uploaded_image, 
                             target_size=tuple(config["model"]["input_size"])
                         )
                         
-                        # Get ML prediction
+                        # Get ML prediction from Keras model (gauravvv7/Oralcancer)
                         prediction = st.session_state.predictor.predict(processed_image)
+                        st.success(f"✅ Model prediction: {prediction['predicted_class']} ({prediction['confidence']:.1%})")
+                    
+                    # Step 2: Cohere AI Analysis
+                    with st.spinner("🤖 Generating AI analysis with Cohere..."):
                         
                         # Create analysis state
                         initial_state = AnalysisState(
