@@ -53,7 +53,7 @@ def render_image_upload(config: dict) -> Image.Image | None:
                 </div>
             """, unsafe_allow_html=True)
             
-            st.image(image, use_container_width=True)
+            st.image(image, width="stretch")
             
             st.markdown("</div>", unsafe_allow_html=True)
             

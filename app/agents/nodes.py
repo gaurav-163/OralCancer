@@ -19,11 +19,19 @@ logger = logging.getLogger(__name__)
 
 def create_llm(config: dict) -> ChatCohere:
     """Create Cohere LLM instance from config"""
-    # Get API key from environment
+    # Get API key from environment or Streamlit secrets
     api_key = os.getenv("COHERE_API_KEY")
     
+    # Fallback to Streamlit secrets if available
     if not api_key:
-        raise ValueError("COHERE_API_KEY not found in environment variables")
+        try:
+            import streamlit as st
+            api_key = st.secrets.get("COHERE_API_KEY")
+        except:
+            pass
+    
+    if not api_key:
+        raise ValueError("COHERE_API_KEY not found in environment variables or Streamlit secrets")
     
     return ChatCohere(
         cohere_api_key=api_key,
