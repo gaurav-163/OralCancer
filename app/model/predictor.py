@@ -201,18 +201,16 @@ class OralCancerPredictor:
             
             print(f"📈 Raw model output: {raw_output:.4f}")
             
-            # TESTING: Check if labels are actually inverted
-            # The model documentation says: 0=Cancer, 1=Normal
-            # But we need to verify this empirically
-            # For now, let's assume the model outputs directly:
-            # Output close to 0 = Normal
-            # Output close to 1 = Oral Cancer (standard convention)
+            # IMPORTANT: Model gauravvv7/Oralcancer uses INVERTED labels
+            # According to model documentation and empirical testing:
+            # Raw output close to 0 = Oral Cancer
+            # Raw output close to 1 = Normal
+            # Therefore we MUST invert the interpretation:
             
-            # Standard interpretation (NOT inverted)
-            cancer_prob = raw_output
-            normal_prob = 1.0 - raw_output
+            cancer_prob = 1.0 - raw_output  # Invert: if raw=0.969 (close to 1=Normal), cancer=0.031
+            normal_prob = raw_output        # If raw=0.969, normal=0.969
             
-            print(f"   Interpreted probabilities:")
+            print(f"   Interpreted probabilities (INVERTED):")
             print(f"      • Normal: {normal_prob:.2%}")
             print(f"      • Oral Cancer: {cancer_prob:.2%}")
             
