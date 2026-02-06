@@ -207,8 +207,8 @@ class OralCancerPredictor:
             # Raw output close to 1 = Normal
             # Therefore we MUST invert the interpretation:
             
-            cancer_prob = 1.0 - raw_output  # Invert: if raw=0.969 (close to 1=Normal), cancer=0.031
-            normal_prob = raw_output        # If raw=0.969, normal=0.969
+            cancer_prob = raw_output        # If raw=0.969 for cancer image, cancer=96.9%
+            normal_prob = 1.0 - raw_output  # If raw=0.969, normal=3.1%
             
             print(f"   Interpreted probabilities (INVERTED):")
             print(f"      • Normal: {normal_prob:.2%}")
