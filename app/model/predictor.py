@@ -45,10 +45,15 @@ class OralCancerPredictor:
         try:
             from huggingface_hub import hf_hub_download
             
-            print(f"Downloading model from {self.hf_repo_id}...")
+            print("="*80)
+            print(f"🔽 DOWNLOADING MODEL FROM HUGGING FACE")
+            print(f"   Repository: {self.hf_repo_id}")
+            print(f"   Filename: {self.hf_filename}")
+            print("="*80)
             
             models_dir = self.model_path.parent
             models_dir.mkdir(parents=True, exist_ok=True)
+            print(f"📁 Download directory: {models_dir}")
             
             downloaded = hf_hub_download(
                 repo_id=self.hf_repo_id,
@@ -57,22 +62,47 @@ class OralCancerPredictor:
                 local_dir_use_symlinks=False
             )
             
-            print(f"Model downloaded: {downloaded}")
+            print("="*80)
+            print(f"✅ MODEL DOWNLOADED SUCCESSFULLY")
+            print(f"   Path: {downloaded}")
+            print(f"   Size: {Path(downloaded).stat().st_size / (1024*1024):.2f} MB")
+            print("="*80)
             return Path(downloaded)
             
         except Exception as e:
+            print("="*80)
+            print(f"❌ DOWNLOAD FAILED: {e}")
+            print("="*80)
             logger.error(f"Download failed: {e}")
+            import traceback
+            traceback.print_exc()
             return None
     
     def _load_model(self) -> None:
         """Load the Keras model."""
+        print("\n" + "="*80)
+        print("🚀 INITIALIZING MODEL LOADING")
+        print("="*80)
+        
+        # Check if model exists locally
+        print(f"📍 Looking for model at: {self.model_path}")
+        print(f"   File exists: {self.model_path.exists()}")
+        
         # Download if needed
         if not self.model_path.exists():
+            print("⚠️  Model file not found locally - initiating download...")
             downloaded = self._download_from_hf()
             if downloaded:
                 self.model_path = downloaded
+            else:
+                print("❌ Failed to download model")
+        else:
+            print(f"✅ Model file found locally ({self.model_path.stat().st_size / (1024*1024):.2f} MB)")
         
         if not self.model_path.exists():
+            print("="*80)
+            print("❌ MODEL FILE NOT AVAILABLE - Using mock predictions")
+            print("="*80)
             logger.error("Model file not found")
             self.model = None
             self.model_type = "mock"
@@ -81,7 +111,10 @@ class OralCancerPredictor:
         try:
             import tensorflow as tf
             
-            print(f"Loading model: {self.model_path}")
+            print("="*80)
+            print(f"📥 LOADING MODEL FROM: {self.model_path}")
+            print("="*80)
+            
             self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
             self.model_type = "keras"
             
@@ -92,19 +125,37 @@ class OralCancerPredictor:
                 if h and w:
                     self.input_size = (h, w)
             
-            print(f"Model loaded! Input size: {self.input_size}")
-            print(f"Model output shape: {self.model.output_shape}")
-            print("Note: Model output 0=Cancer, 1=Normal (inverted)")
+            print("="*80)
+            print("✅ MODEL LOADED SUCCESSFULLY")
+            print(f"   Model type: Keras/TensorFlow")
+            print(f"   Input shape: {self.model.input_shape}")
+            print(f"   Output shape: {self.model.output_shape}")
+            print(f"   Expected input size: {self.input_size}")
+            print(f"   Classes: {self.classes}")
+            print(f"   ⚠️  Note: Model uses INVERTED labels (0=Cancer, 1=Normal)")
+            print("="*80 + "\n")
             
         except Exception as e:
+            print("="*80)
+            print(f"❌ MODEL LOADING FAILED: {e}")
+            print("="*80)
             logger.error(f"Failed to load model: {e}")
-            print(f"Model load error: {e}")
+            import traceback
+            traceback.print_exc()
             self.model = None
             self.model_type = "mock"
+            print("⚠️  Falling back to mock predictions")
     
     def predict(self, image: np.ndarray) -> dict:
         """Make a prediction on the input image."""
+        print("\n" + "="*80)
+        print("🔮 STARTING PREDICTION")
+        print(f"   Model type: {self.model_type}")
+        print(f"   Input image shape: {image.shape}")
+        print("="*80)
+        
         if self.model is None:
+            print("⚠️  No model loaded - using mock prediction")
             return self._mock_prediction(image)
         
         return self._keras_prediction(image)
@@ -127,17 +178,22 @@ class OralCancerPredictor:
         pil_img = pil_img.resize((self.input_size[1], self.input_size[0]), PILImage.Resampling.LANCZOS)
         
         # Convert back to numpy and normalize to [0, 1]
-        processed = np.array(pil_img).astype(np.float32) / 255.0
-        
-        return processed
-    
-    def _keras_prediction(self, image: np.ndarray) -> dict:
-        """Make prediction using Keras model."""
-        try:
+        procprint("📊 Preprocessing image...")
             # Preprocess
             processed = self._preprocess(image)
+            print(f"   Processed shape: {processed.shape}")
+            print(f"   Value range: [{processed.min():.3f}, {processed.max():.3f}]")
             
             # Add batch dimension
+            batch_input = np.expand_dims(processed, axis=0)
+            print(f"   Batch input shape: {batch_input.shape}")
+            
+            # Predict
+            print("🧠 Running model inference...")
+            prediction = self.model.predict(batch_input, verbose=0)
+            raw_output = float(prediction[0][0])
+            
+            print(f"📈 tch dimension
             batch_input = np.expand_dims(processed, axis=0)
             
             # Predict
@@ -150,12 +206,9 @@ class OralCancerPredictor:
             # Output close to 0 = Oral Cancer
             # Output close to 1 = Normal
             # So we INVERT the interpretation:
-            
-            # Cancer probability = 1 - raw_output
-            cancer_prob = 1.0 - raw_output
-            normal_prob = raw_output
-            
-            print(f"Interpreted: Normal={normal_prob:.2%}, Cancer={cancer_prob:.2%}")
+               Interpreted probabilities:")
+            print(f"      • Normal: {normal_prob:.2%}")
+            print(f"      • Oral Cancer: {cancer_prob:.2%}")
             
             class_probs = {
                 self.classes[0]: normal_prob,   # Normal
@@ -170,10 +223,23 @@ class OralCancerPredictor:
                 predicted_class = self.classes[0]  # Normal
                 confidence = normal_prob
             
-            print(f"Final prediction: {predicted_class} ({confidence:.1%})")
+            print("="*80)
+            print(f"✅ PREDICTION COMPLETE")
+            print(f"   Predicted class: {predicted_class}")
+            print(f"   Confidence: {confidence:.1%}")
+            print(f"   Above threshold ({self.confidence_threshold:.0%}): {confidence >= self.confidence_threshold}")
+            print("="*80 + "\n
+            else:
+                predicted_class = self.classes[0]  # Normal
+                confidence = normal_prob
             
-            return {
-                "predicted_class": predicted_class,
+            print("="*80)
+            print(f"❌ PREDICTION FAILED: {e}")
+            print("="*80)
+            logger.error(f"Prediction failed: {e}")
+            import traceback
+            traceback.print_exc()
+            print("⚠️  Falling back to mock prediction"": predicted_class,
                 "confidence": confidence,
                 "class_probabilities": class_probs,
                 "above_threshold": confidence >= self.confidence_threshold,
