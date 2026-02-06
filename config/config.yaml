@@ -9,8 +9,8 @@ model:
   # Local path for the downloaded model
   path: "app/models/oral-cancer-model.h5"
   # Hugging Face repository to download from
-  huggingface_repo_id: "gauravvv7/oralcancervit"
-  huggingface_filename: "oral-cancer-model.h5"
+  huggingface_repo_id: "gauravvv7/Oralcancer"
+  huggingface_filename: "vit_model.h5"
   input_size: [224, 224]
   classes:
     - "Normal"

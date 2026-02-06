@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class OralCancerPredictor:
     """
-    Wrapper class for the gauravvv7/oralcancervit model from Hugging Face.
+    Wrapper class for the gauravvv7/Oralcancer model from Hugging Face.
     ViT (Vision Transformer) based oral cancer detection model.
     Input: 224x224 RGB images
     Output: Binary classification for oral cancer detection
@@ -28,7 +28,7 @@ class OralCancerPredictor:
         self.confidence_threshold = config["model"]["confidence_threshold"]
         
         # HuggingFace model info
-        self.hf_repo_id = config["model"].get("huggingface_repo_id", "gauravvv7/oralcancervit")
+        self.hf_repo_id = config["model"].get("huggingface_repo_id", "gauravvv7/Oralcancer")
         self.hf_filename = config["model"].get("huggingface_filename", "oral-cancer-model.h5")
         self.model_path = Path(config["model"]["path"])
         
@@ -42,7 +42,7 @@ class OralCancerPredictor:
     def _download_from_hf(self) -> Optional[Path]:
         """Download model from Hugging Face."""
         try:
-            from huggingface_hub import hf_hub_download
+            from huggingface_hub import hf_hub_download, list_repo_files
             
             print("="*80)
             print(f"🔽 DOWNLOADING MODEL FROM HUGGING FACE")
@@ -50,10 +50,27 @@ class OralCancerPredictor:
             print(f"   Filename: {self.hf_filename}")
             print("="*80)
             
+            # Try to detect available .h5 filename in the repo if the configured
+            # filename is not present. This makes the downloader robust to
+            # repositories that use different names such as `vit_model.h5`.
+            try:
+                repo_files = list_repo_files(self.hf_repo_id)
+                print(f"🔎 Files in repo ({self.hf_repo_id}): {len(repo_files)} items")
+                if self.hf_filename not in repo_files:
+                    # find first .h5 file
+                    h5_candidates = [f for f in repo_files if f.lower().endswith('.h5')]
+                    if h5_candidates:
+                        old = self.hf_filename
+                        self.hf_filename = h5_candidates[0]
+                        print(f"⚠️  Configured filename '{old}' not found. Using '{self.hf_filename}' instead.")
+            except Exception as e:
+                print(f"⚠️  Could not list repo files: {e}")
+                # continue and let hf_hub_download attempt the configured filename
+
             models_dir = self.model_path.parent
             models_dir.mkdir(parents=True, exist_ok=True)
             print(f"📁 Download directory: {models_dir}")
-            
+
             downloaded = hf_hub_download(
                 repo_id=self.hf_repo_id,
                 filename=self.hf_filename,
@@ -130,7 +147,7 @@ class OralCancerPredictor:
             print(f"   Output shape: {self.model.output_shape}")
             print(f"   Expected input size: {self.input_size}")
             print(f"   Classes: {self.classes}")
-            print(f"   ⚠️  Model: gauravvv7/oralcancervit (Vision Transformer)")
+            print(f"   ⚠️  Model: {self.hf_repo_id} (Vision Transformer)")
             print("="*80 + "\n")
             
         except Exception as e:
