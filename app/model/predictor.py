@@ -212,17 +212,18 @@ class OralCancerPredictor:
             print(f"      • Normal: {normal_prob:.2%}")
             print(f"      • Oral Cancer: {cancer_prob:.2%}")
             
+            # Use explicit class names to avoid order-related mixups
             class_probs = {
-                self.classes[0]: normal_prob,   # Normal
-                self.classes[1]: cancer_prob    # Oral Cancer
+                "Normal": normal_prob,
+                "Oral Cancer": cancer_prob
             }
             
             # Determine prediction
             if cancer_prob >= 0.5:
-                predicted_class = self.classes[1]  # Oral Cancer
+                predicted_class = "Oral Cancer"
                 confidence = cancer_prob
             else:
-                predicted_class = self.classes[0]  # Normal
+                predicted_class = "Normal"
                 confidence = normal_prob
             
             print("="*80)
