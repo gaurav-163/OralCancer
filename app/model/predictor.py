@@ -201,16 +201,14 @@ class OralCancerPredictor:
             
             print(f"📈 Raw model output: {raw_output:.4f}")
             
-            # IMPORTANT: Model gauravvv7/Oralcancer uses INVERTED labels
-            # According to model documentation and empirical testing:
-            # Raw output close to 0 = Oral Cancer
-            # Raw output close to 1 = Normal
-            # Therefore we MUST invert the interpretation:
+            # IMPORTANT: Training labels are {"cancer": 0, "non_cancer": 1}
+            # With sigmoid output, raw_output represents P(class=1) = P(non_cancer/Normal)
+            # Therefore: cancer_prob = 1 - raw_output, normal_prob = raw_output
             
-            cancer_prob = raw_output        # If raw=0.969 for cancer image, cancer=96.9%
-            normal_prob = 1.0 - raw_output  # If raw=0.969, normal=3.1%
+            cancer_prob = 1.0 - raw_output
+            normal_prob = raw_output
             
-            print(f"   Interpreted probabilities (INVERTED):")
+            print(f"   Interpreted probabilities (label mapping):")
             print(f"      • Normal: {normal_prob:.2%}")
             print(f"      • Oral Cancer: {cancer_prob:.2%}")
             
