@@ -3,7 +3,12 @@ Results Display Component - Professional Design
 """
 import streamlit as st
 from typing import Any
-import markdown
+import html
+
+try:
+    import markdown
+except ImportError:  # Optional dependency in some deployment environments
+    markdown = None
 
 
 def render_results(result: Any, config: dict) -> None:
@@ -128,7 +133,14 @@ def render_results(result: Any, config: dict) -> None:
     st.markdown("</div>", unsafe_allow_html=True)
     
     # AI Analysis
-    analysis_html = markdown.markdown(analysis) if analysis else "<p style='color: #6b7280; font-size: 0.9rem;'>Analysis could not be generated. Please review classification results.</p>"
+    if analysis:
+        if markdown:
+            analysis_html = markdown.markdown(analysis)
+        else:
+            # Fallback to escaped text with preserved line breaks when markdown isn't installed.
+            analysis_html = f"<p>{html.escape(analysis).replace(chr(10), '<br>')}</p>"
+    else:
+        analysis_html = "<p style='color: #6b7280; font-size: 0.9rem;'>Analysis could not be generated. Please review classification results.</p>"
     
     st.markdown(f"""
     <div class="card">
